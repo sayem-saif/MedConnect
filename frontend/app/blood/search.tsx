@@ -30,6 +30,7 @@ export default function BloodSearchScreen() {
   const router = useRouter();
   const [bloodBanks, setBloodBanks] = useState<BloodBank[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
   const [selectedBloodType, setSelectedBloodType] = useState<string>('');
   const [selectedUrgency, setSelectedUrgency] = useState<string>('High');
 
@@ -43,6 +44,7 @@ export default function BloodSearchScreen() {
     }
 
     setLoading(true);
+    setSearched(true);
     try {
       const response = await api.post('/api/blood/search', {
         blood_type: selectedBloodType,
@@ -59,12 +61,42 @@ export default function BloodSearchScreen() {
     }
   };
 
+  const getAvailabilityMeta = (units: number) => {
+    if (units <= 0) {
+      return {
+        label: 'Out of Stock',
+        bgColor: COLORS.redLight,
+        textColor: COLORS.red,
+        iconName: 'close-circle' as const,
+      };
+    }
+
+    if (units <= 3) {
+      return {
+        label: 'Low Stock',
+        bgColor: COLORS.orangeLight,
+        textColor: COLORS.orange,
+        iconName: 'alert-circle' as const,
+      };
+    }
+
+    return {
+      label: 'Available',
+      bgColor: COLORS.greenLight,
+      textColor: COLORS.green,
+      iconName: 'check-circle' as const,
+    };
+  };
+
   const handleCall = (phone: string) => {
     Linking.openURL(`tel:${phone}`);
   };
 
-  const renderBloodBank = ({ item }: { item: BloodBank }) => (
-    <View style={styles.bloodBankCard}>
+  const renderBloodBank = ({ item }: { item: BloodBank }) => {
+    const availability = getAvailabilityMeta(item.units_available);
+
+    return (
+      <View style={styles.bloodBankCard}>
       <View style={styles.cardHeader}>
         <View style={styles.bankInfo}>
           <Text style={styles.bankName}>{item.name}</Text>
@@ -74,10 +106,15 @@ export default function BloodSearchScreen() {
           </View>
           <Text style={styles.distanceText}>{item.distance} km away</Text>
         </View>
-        <View style={styles.availabilityBadge}>
-          <MaterialCommunityIcons name="water" size={24} color={COLORS.red} />
+        <View style={styles.bloodTypePill}>
+          <MaterialCommunityIcons name="water" size={18} color={COLORS.red} />
           <Text style={styles.bloodType}>{item.blood_type}</Text>
         </View>
+      </View>
+
+      <View style={[styles.stockBadge, { backgroundColor: availability.bgColor }]}>
+        <MaterialCommunityIcons name={availability.iconName} size={16} color={availability.textColor} />
+        <Text style={[styles.stockBadgeText, { color: availability.textColor }]}>{availability.label}</Text>
       </View>
 
       <View style={styles.divider} />
@@ -96,8 +133,9 @@ export default function BloodSearchScreen() {
           <Text style={styles.callButtonText}>Call Now</Text>
         </TouchableOpacity>
       </View>
-    </View>
-  );
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -177,6 +215,12 @@ export default function BloodSearchScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
+      ) : searched ? (
+        <View style={styles.emptyState}>
+          <MaterialCommunityIcons name="water-off" size={34} color={COLORS.gray} />
+          <Text style={styles.emptyStateTitle}>No Blood Banks Found</Text>
+          <Text style={styles.emptyStateText}>Try another blood type or urgency level to check availability.</Text>
+        </View>
       ) : null}
     </SafeAreaView>
   );
@@ -212,7 +256,11 @@ const styles = StyleSheet.create({
   selectionContainer: {
     backgroundColor: COLORS.white,
     padding: 20,
-    marginBottom: 16,
+    margin: 16,
+    marginBottom: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   sectionTitle: {
     fontSize: 16,
@@ -229,7 +277,7 @@ const styles = StyleSheet.create({
     width: '21%',
     aspectRatio: 1,
     borderRadius: 12,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -255,7 +303,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 12,
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: COLORS.white,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: COLORS.border,
@@ -294,12 +342,15 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+    paddingTop: 8,
   },
   bloodBankCard: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -336,14 +387,34 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: '600',
   },
-  availabilityBadge: {
+  bloodTypePill: {
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.redLight,
+    borderRadius: 12,
+    minWidth: 70,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     gap: 4,
   },
   bloodType: {
     fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.red,
+  },
+  stockBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    gap: 6,
+    marginBottom: 12,
+  },
+  stockBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   divider: {
     height: 1,
@@ -381,5 +452,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.white,
+  },
+  emptyState: {
+    marginHorizontal: 16,
+    marginTop: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyStateTitle: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  emptyStateText: {
+    marginTop: 6,
+    textAlign: 'center',
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
   },
 });

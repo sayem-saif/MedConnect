@@ -1,90 +1,69 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# =========================
+# MedConnect Root .gitignore
+# =========================
 
-# IDE and editors
+# OS / editor
+.DS_Store
+Thumbs.db
 .idea/
 .vscode/
 
-# Dependencies
-node_modules/
-/node_modules
-/.pnp
-.pnp.js
-.yarn/install-state.gz
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# Testing
-/coverage
-
-# Next.js
-/.next/
-/out/
-next-env.d.ts
-*.tsbuildinfo
-
-# Production builds
-# Keep dist tracked for web deploys (remove ignore)
-
-# Environment files (comprehensive coverage)
-
-*token.json*
-*credentials.json*
-
-# Logs and debug files
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-dump.rdb
+pnpm-debug.log*
 
-# System files
-.DS_Store
-*.pem
+# Secrets / env
+.env
+.env.*
+!.env.example
+frontend/.env
+backend/.env
+*token.json*
+*credentials.json*
 
-# Python
+# Python backend
 __pycache__/
-*pyc*
+*.py[cod]
+*.pyd
+*.pyo
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
 venv/
 .venv/
 
-# Development tools
-chainlit.md
-.chainlit
-.ipynb_checkpoints/
-.ac
-
-# Deployment
-.vercel
-
-# Data and databases
-agenthub/agents/youtube/db
-
-# Archive files and large assets
-**/*.zip
-**/*.tar.gz
-**/*.tar
-**/*.tgz
-*.pack
-*.deb
-*.dylib
-
-# Build caches
-.cache/
-
-# Mobile development
-android-sdk/ 
-
-# Expo/React Native frontend caches
+# Node / frontend
+node_modules/
+frontend/node_modules/
 frontend/.expo/
 frontend/.expo-shared/
 frontend/.metro-cache/
-frontend/android/.gradle/
-frontend/android/app/build/
-frontend/android/build/
+frontend/.cache/
+frontend/dist/
+frontend/web-build/
+frontend/expo-env.d.ts
+*.tsbuildinfo
 
-# Environment files
-frontend/.env
-backend/.env
+# React Native / Android build outputs
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/app/build/
+
+# Archive and binary artifacts
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.dmg
+*.exe
+
+# Misc
+.ipynb_checkpoints/
