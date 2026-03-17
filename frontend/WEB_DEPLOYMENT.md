@@ -25,7 +25,24 @@ This frontend is now web-ready and can be deployed as a static website.
 - Cloudflare Pages: build command `npm run build:web`, output directory `dist`
 - Any static host: upload `dist` directory
 
-## 4) Backend Requirements
+## 4) Cloudflare Pages (Recommended Setup)
+
+1. In Cloudflare Dashboard, go to Workers & Pages -> Create application -> Pages -> Connect to Git.
+2. Select this repository and choose `frontend` as the project root.
+3. Use these build settings:
+   - Framework preset: `None`
+   - Build command: `npm run build:web`
+   - Build output directory: `dist`
+4. Add environment variable:
+   - `EXPO_PUBLIC_BACKEND_URL=https://your-backend-domain.com`
+5. Deploy.
+
+Notes:
+- The build script now automatically creates `dist/_redirects` for SPA route fallback.
+- The build script now automatically creates `dist/_headers` for basic headers/caching.
+- If your backend is on another domain, make sure backend CORS allows your Cloudflare Pages domain.
+
+## 5) Backend Requirements
 
 - Backend must be reachable from the public internet.
 - CORS must allow frontend domain(s).
@@ -33,7 +50,7 @@ This frontend is now web-ready and can be deployed as a static website.
   - `POST /api/auth/login`
   - `POST /api/auth/register`
 
-## 5) Login Troubleshooting
+## 6) Login Troubleshooting
 
 If login fails:
 
